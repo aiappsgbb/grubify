@@ -5,18 +5,31 @@ metadata:
 services:
   api:
     project: ./GrubifyApi
-    language: dotnet
+    language: docker
     host: containerapp
+    docker:
+      path: ./Dockerfile
+      remoteBuild: true
 
   frontend:
     project: ./grubify-frontend
-    language: js
+    language: docker
     host: containerapp
+    docker:
+      path: ./Dockerfile
+      remoteBuild: true
 
 hooks:
   postdeploy:
-    shell: pwsh
-    run: |
-      echo "🍕 Grubify Food Delivery App deployed successfully!"
-      echo "Frontend URL: $env:FRONTEND_URL"
-      echo "API URL: $env:API_BASE_URL"
+    posix:
+      shell: sh
+      run: |
+        echo "🍕 Grubify Food Delivery App deployed successfully!"
+        echo "Frontend URL: $FRONTEND_URL"
+        echo "API URL: $API_BASE_URL"
+    windows:
+      shell: pwsh
+      run: |
+        echo "🍕 Grubify Food Delivery App deployed successfully!"
+        echo "Frontend URL: $env:FRONTEND_URL"
+        echo "API URL: $env:API_BASE_URL"

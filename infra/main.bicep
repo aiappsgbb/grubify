@@ -34,7 +34,7 @@ module containerRegistry 'core/host/container-registry.bicep' = {
   name: 'container-registry'
   scope: rg
   params: {
-    name: '${abbrs.containerRegistryRegistries}${resourceToken}'
+    name: '${abbrs.containerRegistryRegistries}${resourceToken}${uniqueString(subscription().id, environmentName)}'
     location: location
     tags: tags
   }

@@ -16,6 +16,7 @@ A modern food delivery application built with React TypeScript frontend and .NET
 - **Backend**: .NET 9 Web API with RESTful endpoints
 - **Infrastructure**: Azure Container Apps + Container Registry
 - **Deployment**: Azure Developer CLI (azd)
+- **Image Builds**: Built in the cloud by Azure Container Registry (ACR Tasks) — no local Docker required
 
 ## 🚀 Complete Deployment Guide
 
@@ -23,27 +24,15 @@ This guide shows how to deploy Grubify with **both backend versions** (v1 with m
 
 ## 📋 Prerequisites
 
-Before deploying Grubify, ensure you have the following tools installed and running:
+Before deploying Grubify, ensure you have the following tools installed:
 
 ### Required Tools
 - **[Azure Developer CLI (azd)](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd)** - Latest version
-- **[Docker Desktop](https://www.docker.com/products/docker-desktop/)** - Must be **running** before deployment
 - **[Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)** - For additional Azure operations
 - **Azure Subscription** - With Contributor/Owner permissions
 
-### ⚠️ Important: Docker Desktop
-**Docker Desktop must be running before executing `azd up`**. The deployment will fail if Docker is not started.
-
-To start Docker Desktop:
-- **macOS/Windows**: Launch Docker Desktop application
-- **Linux**: Run `sudo systemctl start docker`
-
-Verify Docker is running:
-```bash
-open -a Docker
-docker --version
-docker ps
-```
+### ☁️ Cloud Container Builds
+Docker is **not** required on your machine. Both services are configured with `docker.remoteBuild: true` in `azure.yaml`, so `azd up` / `azd deploy` uploads each service's source (filtered by its `.dockerignore`) to Azure Container Registry, which builds the image with ACR Tasks and pushes it to the registry.
 
 ### Prerequisites
 
@@ -63,10 +52,6 @@ Before starting, run our prerequisites check script:
 # Clone the repository
 git clone https://github.com/dm-chelupati/grubify.git
 cd grubify
-
-# ⚠️ IMPORTANT: Start Docker Desktop before proceeding
-# Verify Docker is running
-docker ps
 
 # Login to Azure
 azd auth login
@@ -88,7 +73,7 @@ azd up
 
 This creates:
 - **Resource Group**: `rg-grubify-app`
-- **Container Registry**: `crgrubify`
+- **Container Registry**: `crgrubify<unique-suffix>` (registry names must be globally unique)
 - **Container Apps Environment**: `cae-grubify`
 - **API Container App**: `ca-grubify-api`
 - **Frontend Container App**: `ca-grubify-frontend`

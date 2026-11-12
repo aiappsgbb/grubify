@@ -5,15 +5,6 @@ echo "============================================="
 
 EXIT_CODE=0
 
-# Check Docker
-echo -n "Docker Desktop: "
-if docker ps > /dev/null 2>&1; then
-    echo "✅ Running"
-else
-    echo "❌ Not running - Please start Docker Desktop"
-    EXIT_CODE=1
-fi
-
 # Check Azure CLI
 echo -n "Azure CLI: "
 if az --version > /dev/null 2>&1; then
