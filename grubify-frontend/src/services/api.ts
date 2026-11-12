@@ -6,7 +6,8 @@ import {
   Order,
   AddCartItemRequest,
   UpdateCartItemRequest,
-  PlaceOrderRequest
+  PlaceOrderRequest,
+  Deal
 } from '../types';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5291/api';
@@ -89,4 +90,9 @@ export const orderService = {
   
   cancel: (id: number): Promise<Order> => 
     api.put(`/orders/${id}/cancel`).then(response => response.data),
+};
+
+export const dealService = {
+  getHotDeals: (): Promise<Deal[]> =>
+    api.get('/deals').then(response => response.data),
 };

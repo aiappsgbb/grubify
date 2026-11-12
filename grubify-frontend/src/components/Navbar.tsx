@@ -15,6 +15,7 @@ import {
   Search as SearchIcon,
   ShoppingCart as ShoppingCartIcon,
   Restaurant as RestaurantIcon,
+  LocalFireDepartment as HotDealsIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
@@ -122,6 +123,15 @@ const Navbar: React.FC = () => {
             />
           </Search>
         </Box>
+
+        <Button
+          color="inherit"
+          startIcon={<HotDealsIcon />}
+          onClick={() => navigate('/deals')}
+          sx={{ mr: 1, fontWeight: 'bold' }}
+        >
+          Hot Deals
+        </Button>
 
         <Button color="inherit" sx={{ mr: 2 }}>
           Sign In

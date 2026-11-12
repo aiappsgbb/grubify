@@ -5,18 +5,41 @@ metadata:
 services:
   api:
     project: ./GrubifyApi
-    language: dotnet
+    language: docker
     host: containerapp
+    docker:
+      path: ./Dockerfile
+      remoteBuild: true
 
   frontend:
     project: ./grubify-frontend
-    language: js
+    language: docker
     host: containerapp
+    docker:
+      path: ./Dockerfile
+      remoteBuild: true
 
 hooks:
+  # Configures the SRE Agent (knowledge base, incident-handler subagent, alert response plan, GitHub repo).
+  postprovision:
+    posix:
+      shell: sh
+      run: python3 ./scripts/setup_sre_agent.py
+      interactive: true
+    windows:
+      shell: pwsh
+      run: python ./scripts/setup_sre_agent.py
+      interactive: true
   postdeploy:
-    shell: pwsh
-    run: |
-      echo "🍕 Grubify Food Delivery App deployed successfully!"
-      echo "Frontend URL: $env:FRONTEND_URL"
-      echo "API URL: $env:API_BASE_URL"
+    posix:
+      shell: sh
+      run: |
+        echo "🍕 Grubify Food Delivery App deployed successfully!"
+        echo "Frontend URL: $FRONTEND_URL"
+        echo "API URL: $API_BASE_URL"
+    windows:
+      shell: pwsh
+      run: |
+        echo "🍕 Grubify Food Delivery App deployed successfully!"
+        echo "Frontend URL: $env:FRONTEND_URL"
+        echo "API URL: $env:API_BASE_URL"

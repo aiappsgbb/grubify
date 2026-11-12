@@ -7,7 +7,7 @@ namespace GrubifyApi.Controllers
     [Route("api/[controller]")]
     public class FoodItemsController : ControllerBase
     {
-        private static readonly List<FoodItem> FoodItems = new()
+        internal static readonly List<FoodItem> FoodItems = new()
         {
             // Tony's Italian Bistro items
             new FoodItem

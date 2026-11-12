@@ -5,15 +5,6 @@ echo "============================================="
 
 EXIT_CODE=0
 
-# Check Docker
-echo -n "Docker Desktop: "
-if docker ps > /dev/null 2>&1; then
-    echo "✅ Running"
-else
-    echo "❌ Not running - Please start Docker Desktop"
-    EXIT_CODE=1
-fi
-
 # Check Azure CLI
 echo -n "Azure CLI: "
 if az --version > /dev/null 2>&1; then
@@ -29,6 +20,15 @@ if azd version > /dev/null 2>&1; then
     echo "✅ Installed"
 else
     echo "❌ Not installed - Install from https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd"
+    EXIT_CODE=1
+fi
+
+# Check Python (runs the SRE Agent setup hook)
+echo -n "Python 3: "
+if python3 --version > /dev/null 2>&1; then
+    echo "✅ Installed ($(python3 --version 2>&1))"
+else
+    echo "❌ Not installed - Install from https://www.python.org/downloads/"
     EXIT_CODE=1
 fi
 

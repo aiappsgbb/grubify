@@ -19,11 +19,13 @@ import {
   Stepper,
   Step,
   StepLabel,
+  Chip,
 } from '@mui/material';
 import {
   CreditCard as CreditCardIcon,
   AccountBalanceWallet as WalletIcon,
   LocalAtm as CashIcon,
+  Bolt as GrubifyPayIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { Cart, PlaceOrderRequest } from '../types';
@@ -340,6 +342,17 @@ const CheckoutPage: React.FC = () => {
                     </Box>
                   }
                 />
+                <FormControlLabel
+                  value="grubify-pay"
+                  control={<Radio />}
+                  label={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <GrubifyPayIcon />
+                      Grubify Pay
+                      <Chip label="New!" color="secondary" size="small" />
+                    </Box>
+                  }
+                />
               </RadioGroup>
             </FormControl>
 
@@ -424,6 +437,7 @@ const CheckoutPage: React.FC = () => {
                 {paymentMethod === 'credit-card' && 'Credit/Debit Card'}
                 {paymentMethod === 'digital-wallet' && 'Digital Wallet'}
                 {paymentMethod === 'cash-on-delivery' && 'Cash on Delivery'}
+                {paymentMethod === 'grubify-pay' && 'Grubify Pay'}
               </Typography>
             </Paper>
 
