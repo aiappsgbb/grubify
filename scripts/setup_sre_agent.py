@@ -37,7 +37,7 @@ AGENT_API_VERSION = "2025-05-01-preview"
 SUBAGENT_NAME = "incident-handler"
 RESPONSE_PLAN_NAME = "grubify-http-errors"
 REPO_PLACEHOLDER = "GITHUB_REPO_PLACEHOLDER"
-TRANSIENT_STATUSES = {401, 403, 404, 408, 409, 429, 500, 502, 503, 504}
+TRANSIENT_STATUSES = {401, 403, 404, 405, 408, 409, 429, 500, 502, 503, 504}
 
 
 class SetupError(Exception):
@@ -143,12 +143,21 @@ class Client:
         return self.request(method, f"{self.endpoint}{path}", SRE_RESOURCE, body)
 
     def agent_with_retry(
-        self, method: str, path: str, body: object | None = None, attempts: int = 5, delay: int = 15
+        self,
+        method: str,
+        path: str,
+        body: object | None = None,
+        attempts: int = 5,
+        delay: int = 15,
+        retry_codes: tuple[str, ...] = (),
     ) -> tuple[int, object]:
         status, payload = 0, None
         for attempt in range(1, attempts + 1):
             status, payload = self.agent(method, path, body)
-            if 200 <= status < 300 or status not in TRANSIENT_STATUSES | {0}:
+            if 200 <= status < 300:
+                return status, payload
+            pending = any(code in json.dumps(payload) for code in retry_codes)
+            if status not in TRANSIENT_STATUSES | {0} and not pending:
                 return status, payload
             if attempt < attempts:
                 log(f"   ...HTTP {status}, retrying in {delay}s ({attempt}/{attempts})")
@@ -246,6 +255,23 @@ def create_subagent(client: Client, github_repo: str) -> None:
     log("   ✅ Created")
 
 
+def wait_for_agent_update(client: Client, agent_id: str, timeout: int = 900) -> None:
+    """Configuration changes are applied asynchronously; the data plane rejects dependent calls until they finish."""
+    deadline = time.time() + timeout
+    while True:
+        status, agent = client.arm("GET", agent_id)
+        _require_ok(status, agent, "Reading the SRE Agent resource")
+        state = (agent.get("properties") or {}).get("provisioningState", "")
+        if state in ("Succeeded", "Failed", "Canceled"):
+            if state != "Succeeded":
+                raise SetupError(f"SRE Agent update finished with state '{state}'")
+            return
+        if time.time() > deadline:
+            raise SetupError(f"SRE Agent update still '{state}' after {timeout}s. Re-run this script later.")
+        log(f"   ...agent update {state or 'pending'}, checking again in 20s")
+        time.sleep(20)
+
+
 def configure_incident_response(client: Client, agent_id: str, alert_name: str) -> None:
     log("🚨 Connecting Azure Monitor alerts...")
     status, agent = client.arm("GET", agent_id)
@@ -266,8 +292,8 @@ def configure_incident_response(client: Client, agent_id: str, alert_name: str) 
         }
         status, payload = client.arm("PATCH", agent_id, body)
         _require_ok(status, payload, "Enabling Azure Monitor incident management")
-        log("   ✅ Azure Monitor enabled, waiting 30s for it to apply")
-        time.sleep(30)
+        log("   ✅ Azure Monitor enabled")
+    wait_for_agent_update(client, agent_id)
 
     body = {
         "name": RESPONSE_PLAN_NAME,
@@ -288,7 +314,13 @@ def configure_incident_response(client: Client, agent_id: str, alert_name: str) 
             "isEnabled": True,
         },
     }
-    status, payload = client.agent_with_retry("PUT", f"/api/v2/extendedAgent/incidentFilters/{RESPONSE_PLAN_NAME}", body)
+    status, payload = client.agent_with_retry(
+        "PUT",
+        f"/api/v2/extendedAgent/incidentFilters/{RESPONSE_PLAN_NAME}",
+        body,
+        attempts=20,
+        retry_codes=("IncidentPlatformConfigurationPending",),
+    )
     _require_ok(status, payload, "Response plan")
     log(f"   ✅ Response plan '{RESPONSE_PLAN_NAME}': '{alert_name}' -> {SUBAGENT_NAME} (autonomous)")
 
