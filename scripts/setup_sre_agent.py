@@ -309,7 +309,9 @@ def configure_incident_response(client: Client, agent_id: str, alert_name: str) 
             "handlingAgent": SUBAGENT_NAME,
             "agentMode": "Autonomous",
             "maxAutomatedInvestigationAttempts": 3,
-            "mergeEnabled": True,
+            # Both demo scenarios fire the same alert rule; merging would fold a
+            # payment-failure alert into an earlier memory-leak incident unseen.
+            "mergeEnabled": False,
             "mergeWindowHours": 3,
             "isEnabled": True,
         },
