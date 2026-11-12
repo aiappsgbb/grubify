@@ -11,6 +11,7 @@ import RestaurantPage from './pages/RestaurantPage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderTrackingPage from './pages/OrderTrackingPage';
+import DealsPage from './pages/DealsPage';
 import './App.css';
 
 const theme = createTheme({
@@ -64,6 +65,7 @@ function App() {
               <Route path="/cart" element={<CartPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/order-tracking/:orderId" element={<OrderTrackingPage />} />
+              <Route path="/deals" element={<DealsPage />} />
             </Routes>
           </Container>
         </div>

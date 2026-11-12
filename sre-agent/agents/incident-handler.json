@@ -1,0 +1,26 @@
+{
+  "name": "incident-handler",
+  "handoffDescription": "Investigates Grubify API incidents using the runbook and creates GitHub issues with root cause, evidence and remediation",
+  "instructionsFile": "incident-handler.md",
+  "tools": [
+    "SearchMemory",
+    "RunAzCliReadCommands",
+    "RunAzCliWriteCommands",
+    "GetAzCliHelp",
+    "QueryLogAnalyticsByWorkspaceId",
+    "QueryAppInsightsByResourceId",
+    "ExecutePythonCode",
+    "CreateGithubIssue",
+    "CreateGithubIssueComment",
+    "FetchGithubIssue",
+    "FetchGithubIssues",
+    "FetchGithubIssueComments",
+    "UpdateGithubIssue",
+    "FindConnectedGitHubRepo",
+    "GetIaCForGitHub",
+    "PlotAreaChartWithCorrelation",
+    "PlotHeatmap",
+    "PlotPieChart",
+    "PlotScatter"
+  ]
+}

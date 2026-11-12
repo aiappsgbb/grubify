@@ -25,6 +25,20 @@ namespace GrubifyApi.Controllers
 
         private PaymentResult ProcessPayment(string paymentMethod)
         {
+            if (paymentMethod == "grubify-pay")
+            {
+                var gatewayUrl = GetGrubifyPayGatewayUrl();
+
+                Console.WriteLine($"Grubify Pay: Attempting payment processing with gateway: {gatewayUrl}");
+
+                // Connection always fails: the internal staging gateway is not reachable from production
+                return new PaymentResult
+                {
+                    Success = false,
+                    ErrorMessage = "Connection to payment gateway timed out"
+                };
+            }
+
             if (_isV2Version)
             {
                 // V2: BUG - Payment gateway configuration is incorrect in production
@@ -68,6 +82,12 @@ namespace GrubifyApi.Controllers
             return "https://payment-gateway-staging.internal.com/v1/process";
         }
 
+        private string GetGrubifyPayGatewayUrl()
+        {
+            // Grubify Pay (new payment method) shipped pointing at the staging gateway instead of production
+            return "https://payment-gateway-staging.internal.com/v2/grubify-pay";
+        }
+
         [HttpPost]
         public ActionResult<Order> PlaceOrder([FromBody] PlaceOrderRequest request)
         {
@@ -83,7 +103,7 @@ namespace GrubifyApi.Controllers
             var paymentResult = ProcessPayment(request.PaymentMethod);
             if (!paymentResult.Success)
             {
-                Console.WriteLine($"Payment processing failed in {(_isV2Version ? "v2" : "v1")}: {paymentResult.ErrorMessage}");
+                Console.WriteLine($"Payment processing failed in {(_isV2Version ? "v2" : "v1")} for payment method '{request.PaymentMethod}': {paymentResult.ErrorMessage}");
                 return StatusCode(500, new { 
                     error = "Payment processing failed",
                     code = "PAYMENT_ERROR",
@@ -94,7 +114,7 @@ namespace GrubifyApi.Controllers
                 });
             }
 
-            // V1 reaches here (successful payment), V2 never reaches here
+            // V1 with standard payment methods reaches here; V2 and Grubify Pay never do
             Console.WriteLine($"Payment successful in {(_isV2Version ? "v2" : "v1")} - creating order");
             var order = new Order
             {

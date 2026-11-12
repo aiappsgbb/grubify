@@ -20,6 +20,16 @@ services:
       remoteBuild: true
 
 hooks:
+  # Configures the SRE Agent (knowledge base, incident-handler subagent, alert response plan, GitHub repo).
+  postprovision:
+    posix:
+      shell: sh
+      run: python3 ./scripts/setup_sre_agent.py
+      interactive: true
+    windows:
+      shell: pwsh
+      run: python ./scripts/setup_sre_agent.py
+      interactive: true
   postdeploy:
     posix:
       shell: sh

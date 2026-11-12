@@ -96,3 +96,12 @@ export interface PlaceOrderRequest {
   paymentMethod: string;
   specialInstructions: string;
 }
+
+export interface Deal {
+  id: number;
+  headline: string;
+  discountPercent: number;
+  dealPrice: number;
+  expiresAt: string;
+  foodItem: FoodItem;
+}

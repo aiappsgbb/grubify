@@ -23,6 +23,15 @@ else
     EXIT_CODE=1
 fi
 
+# Check Python (runs the SRE Agent setup hook)
+echo -n "Python 3: "
+if python3 --version > /dev/null 2>&1; then
+    echo "✅ Installed ($(python3 --version 2>&1))"
+else
+    echo "❌ Not installed - Install from https://www.python.org/downloads/"
+    EXIT_CODE=1
+fi
+
 # Check Azure authentication
 echo -n "Azure Authentication: "
 if az account show > /dev/null 2>&1; then
